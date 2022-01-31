@@ -25,6 +25,15 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createAccountStmt, err = db.PrepareContext(ctx, createAccount); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateAccount: %w", err)
 	}
+	if q.deleteAccountStmt, err = db.PrepareContext(ctx, deleteAccount); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteAccount: %w", err)
+	}
+	if q.findAccountStmt, err = db.PrepareContext(ctx, findAccount); err != nil {
+		return nil, fmt.Errorf("error preparing query FindAccount: %w", err)
+	}
+	if q.findAccountsStmt, err = db.PrepareContext(ctx, findAccounts); err != nil {
+		return nil, fmt.Errorf("error preparing query FindAccounts: %w", err)
+	}
 	return &q, nil
 }
 
@@ -33,6 +42,21 @@ func (q *Queries) Close() error {
 	if q.createAccountStmt != nil {
 		if cerr := q.createAccountStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createAccountStmt: %w", cerr)
+		}
+	}
+	if q.deleteAccountStmt != nil {
+		if cerr := q.deleteAccountStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteAccountStmt: %w", cerr)
+		}
+	}
+	if q.findAccountStmt != nil {
+		if cerr := q.findAccountStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing findAccountStmt: %w", cerr)
+		}
+	}
+	if q.findAccountsStmt != nil {
+		if cerr := q.findAccountsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing findAccountsStmt: %w", cerr)
 		}
 	}
 	return err
@@ -75,6 +99,9 @@ type Queries struct {
 	db                DBTX
 	tx                *sql.Tx
 	createAccountStmt *sql.Stmt
+	deleteAccountStmt *sql.Stmt
+	findAccountStmt   *sql.Stmt
+	findAccountsStmt  *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -82,5 +109,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                tx,
 		tx:                tx,
 		createAccountStmt: q.createAccountStmt,
+		deleteAccountStmt: q.deleteAccountStmt,
+		findAccountStmt:   q.findAccountStmt,
+		findAccountsStmt:  q.findAccountsStmt,
 	}
 }
