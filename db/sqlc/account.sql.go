@@ -103,3 +103,18 @@ func (q *Queries) FindAccounts(ctx context.Context, arg FindAccountsParams) ([]A
 	}
 	return items, nil
 }
+
+const updateAccountBalance = `-- name: UpdateAccountBalance :exec
+UPDATE accounts SET balance = $2
+WHERE id = $1
+`
+
+type UpdateAccountBalanceParams struct {
+	ID      int64 `json:"id"`
+	Balance int64 `json:"balance"`
+}
+
+func (q *Queries) UpdateAccountBalance(ctx context.Context, arg UpdateAccountBalanceParams) error {
+	_, err := q.exec(ctx, q.updateAccountBalanceStmt, updateAccountBalance, arg.ID, arg.Balance)
+	return err
+}

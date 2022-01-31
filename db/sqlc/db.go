@@ -34,6 +34,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.findAccountsStmt, err = db.PrepareContext(ctx, findAccounts); err != nil {
 		return nil, fmt.Errorf("error preparing query FindAccounts: %w", err)
 	}
+	if q.updateAccountBalanceStmt, err = db.PrepareContext(ctx, updateAccountBalance); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateAccountBalance: %w", err)
+	}
 	return &q, nil
 }
 
@@ -57,6 +60,11 @@ func (q *Queries) Close() error {
 	if q.findAccountsStmt != nil {
 		if cerr := q.findAccountsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing findAccountsStmt: %w", cerr)
+		}
+	}
+	if q.updateAccountBalanceStmt != nil {
+		if cerr := q.updateAccountBalanceStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateAccountBalanceStmt: %w", cerr)
 		}
 	}
 	return err
@@ -96,21 +104,23 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                DBTX
-	tx                *sql.Tx
-	createAccountStmt *sql.Stmt
-	deleteAccountStmt *sql.Stmt
-	findAccountStmt   *sql.Stmt
-	findAccountsStmt  *sql.Stmt
+	db                       DBTX
+	tx                       *sql.Tx
+	createAccountStmt        *sql.Stmt
+	deleteAccountStmt        *sql.Stmt
+	findAccountStmt          *sql.Stmt
+	findAccountsStmt         *sql.Stmt
+	updateAccountBalanceStmt *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                tx,
-		tx:                tx,
-		createAccountStmt: q.createAccountStmt,
-		deleteAccountStmt: q.deleteAccountStmt,
-		findAccountStmt:   q.findAccountStmt,
-		findAccountsStmt:  q.findAccountsStmt,
+		db:                       tx,
+		tx:                       tx,
+		createAccountStmt:        q.createAccountStmt,
+		deleteAccountStmt:        q.deleteAccountStmt,
+		findAccountStmt:          q.findAccountStmt,
+		findAccountsStmt:         q.findAccountsStmt,
+		updateAccountBalanceStmt: q.updateAccountBalanceStmt,
 	}
 }
